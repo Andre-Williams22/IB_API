@@ -15,7 +15,6 @@ import time
 class TradingApp(EWrapper, EClient):
     
     def __init__(self):
-        
         EClient.__init__(self, self)
     
     def error(self, reqId, errorCode, errorString):
@@ -30,14 +29,18 @@ class TradingApp(EWrapper, EClient):
 def websocket_connection():
     # creates our connection
     app.run()
+    event.wait()
+    if event.is_set():
+        app.close()
+    
         
-
-
+    
+event = threading.Event()
 app = TradingApp()
 app.connect("127.0.0.1", 7497, clientId=1)
 
     
-con_thread = threading.Thread(target=websocket_connection, daemon=True)
+con_thread = threading.Thread(target=websocket_connection)
 con_thread.start()
 time.sleep(1)
 
@@ -52,6 +55,7 @@ contract.exchange = "SMART"
 app.reqContractDetails(100, contract)
 # closes after 5 seconds
 time.sleep(5)
+event.set()
 
 
 
